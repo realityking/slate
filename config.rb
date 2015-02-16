@@ -22,6 +22,19 @@ activate :syntax
 activate :relative_assets
 set :relative_links, true
 
+class MyFeature < Middleman::Extension
+  def initialize(app, options_hash={}, &block)
+    super
+    app.before_render do |body, path, locs, template_class|
+      puts app.sitemap.to_yaml
+      body
+    end
+  end
+end
+
+::Middleman::Extensions.register(:my_feature, MyFeature)
+activate :my_feature
+
 # Build Configuration
 configure :build do
   activate :minify_css
