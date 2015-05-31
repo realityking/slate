@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var content, searchResults;
+  var content, searchResults, titleMap = {};
   var highlightOpts = { element: 'span', className: 'search-highlight' };
 
   var index = new lunr.Index();
@@ -13,22 +13,21 @@
   index.field('body');
   index.pipeline.add(lunr.trimmer, lunr.stopWordFilter);
 
-  $(populate);
-  $(bind);
+  $(init);
 
-  function populate() {
-    $('h1, h2').each(function() {
-      var title = $(this);
-      var body = title.nextUntil('h1, h2');
+  function init() {
+    $('h1, h2').each(function(i, element) {
+      var body = $(element).nextUntil('h1, h2').text();
+      var id = element.id;
+      var title = element.textContent;
+      titleMap[id] = title;
       index.add({
-        id: title.prop('id'),
-        title: title.text(),
-        body: body.text()
+        id: id,
+        title: title,
+        body: body
       });
     });
-  }
 
-  function bind() {
     content = $('.content');
     searchResults = $('.search-results');
 
@@ -37,35 +36,39 @@
 
   function search(event) {
     unhighlight();
-    searchResults.addClass('visible');
 
     // ESC clears the field
     if (event.keyCode === 27) this.value = '';
 
     if (this.value) {
-      var results = index.search(this.value).filter(function(r) {
-        return r.score > 0.0001;
-      });
+      searchResults.addClass('visible');
 
+      var results = index.search(this.value).filter(goodScore);
+
+      var resultHtml;
       if (results.length) {
-        searchResults.empty();
-        $.each(results, function (index, result) {
-          var elem = document.getElementById(result.ref);
-          searchResults.append("<li><a href='#" + result.ref + "'>" + $(elem).text() + "</a></li>");
-        });
-        highlight.call(this);
+        resultHtml = results.map(searchResultEntry).join('');
+        highlight(this.value);
       } else {
-        searchResults.html('<li></li>');
-        $('.search-results li').text('No Results Found for "' + this.value + '"');
+        resultHtml = document.createElement('li');
+        resultHtml.textContent = 'No Results Found for "' + this.value + '"';
       }
+      searchResults.html(resultHtml);
     } else {
-      unhighlight();
       searchResults.removeClass('visible');
     }
   }
 
-  function highlight() {
-    if (this.value) content.highlight(this.value, highlightOpts);
+  function searchResultEntry(result) {
+    return "<li><a href='#" + result.ref + "'>" + titleMap[result.ref] + "</a></li>";
+  }
+
+  function goodScore(result) {
+    return result.score > 0.0001;
+  }
+
+  function highlight(value) {
+    content.highlight(value, highlightOpts);
   }
 
   function unhighlight() {
