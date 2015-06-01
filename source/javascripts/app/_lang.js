@@ -16,14 +16,14 @@ under the License.
 (function (global) {
   'use strict';
 
-  var languages = [];
+  var languages = [], activeLanguage;
 
   global.setupLanguages = setupLanguages;
   global.activateLanguage = activateLanguage;
 
   function activateLanguage(language) {
-    if (!language) return;
-    if (language === "") return;
+    if (!language || language === "") return;
+    if (language === activeLanguage) return;
 
     $(".lang-selector a").removeClass('active');
     $(".lang-selector a[data-language-name='" + language + "']").addClass('active');
@@ -35,9 +35,11 @@ under the License.
     global.toc.calculateHeights();
 
     // scroll to the new location of the position
-    if ($(window.location.hash).get(0)) {
-      $(window.location.hash).get(0).scrollIntoView(true);
+    var elem = document.getElementById(window.location.hash);
+    if (elem) {
+      elem.scrollIntoView(true);
     }
+    activeLanguage = language;
   }
 
   // if a button is clicked, add the state to the history
@@ -55,15 +57,16 @@ under the License.
 
   function setupLanguages(l) {
     var defaultLanguage = localStorage.getItem("language");
+    var search = location.search.substr(1);
 
     languages = l;
 
-    if ((location.search.substr(1) !== "") && (jQuery.inArray(location.search.substr(1), languages)) != -1) {
+    if (search !== "" && languages.indexOf(search) !== -1) {
       // the language is in the URL, so use that language!
-      activateLanguage(location.search.substr(1));
+      activateLanguage(search);
 
-      localStorage.setItem("language", location.search.substr(1));
-    } else if ((defaultLanguage !== null) && (jQuery.inArray(defaultLanguage, languages) != -1)) {
+      localStorage.setItem("language", search);
+    } else if ((defaultLanguage !== null) && (languages.indexOf(defaultLanguage) !== -1)) {
       // the language was the last selected one saved in localstorage, so use that language!
       activateLanguage(defaultLanguage);
     } else {
@@ -74,11 +77,11 @@ under the License.
 
   // if we click on a language tab, activate that language
   $(function() {
-    $(".lang-selector a").on("click", function() {
-      var language = $(this).data("language-name");
+    $(".lang-selector a").on("click", function(event) {
+      event.preventDefault();
+      var language = event.target.getAttribute("data-language-name");
       pushURL(language);
       activateLanguage(language);
-      return false;
     });
     window.onpopstate = function() {
       activateLanguage(window.location.search.substr(1));
