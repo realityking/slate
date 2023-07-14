@@ -2,25 +2,32 @@
   "private": true,
   "size-limit": [
     {
-      "path": "build/javascripts/all.js"
+      "path": "build/javascripts/all.js",
+      "limit": "48kB"
     },
     {
-      "path": "build/javascripts/all_nosearch.js"
+      "path": "build/javascripts/all_nosearch.js",
+      "limit": "38kB"
     },
     {
-      "path": "build/stylesheets/screen.css"
+      "path": "build/stylesheets/screen.css",
+      "limit": "4kB"
     },
     {
-      "path": "build/stylesheets/print.css"
+      "path": "build/stylesheets/print.css",
+      "limit": "2kB"
     },
     {
-      "path": "build/images/navbar.png"
+      "path": "build/images/navbar.png",
+      "limit": "1kB"
     },
     {
-      "path": "build/fonts/slate.woff2"
+      "path": "build/fonts/slate.woff2",
+      "limit": "1kB"
     },
     {
-      "path": "build/index.html"
+      "path": "build/index.html",
+      "limit": "5kB"
     }
   ],
   "scripts": {
